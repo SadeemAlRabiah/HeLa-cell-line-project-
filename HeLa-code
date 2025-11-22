@@ -1,0 +1,36 @@
+import pandas as pd
+import matplotlib.pyplot as plt 
+
+# read data in file
+data = pd.read_csv(r"C:\Users\Hmr13\Desktop\HELA mutations (1).csv")
+print(data.columns)
+print(data.head)
+#missing data
+missing_data = data.isna().sum()
+if missing_data.any():
+    print("there are missing data")
+    print(missing_data[missing_data > 0])
+else:
+    print("there are no missing data")
+
+# check for mutation
+mutation_counts = data.groupby("Gene")["Variant Info"].size().reset_index(name ="Mutation Count")
+genes_with_multiple_mutations = mutation_counts[mutation_counts["Mutation Count"] > 1]
+if not genes_with_multiple_mutations.empty:
+    print("Genes with more then one occurences of the same mutation type:")
+    print(genes_with_multiple_mutations)
+mutation_gene_count_non_unique = data["Variant Info"].value_counts()
+mutation_gene_counts_sorted_non_unique = mutation_gene_count_non_unique.sort_values(ascending = False)
+
+plt.figure(figsize= (12,6))
+colors = plt.cm.tab10(range(len(mutation_gene_counts_sorted_non_unique)))
+#plot the bar chart
+mutation_gene_counts_sorted_non_unique.plot(kind= "bar", color= colors , label= "Non-unique Genes")
+for i, v in enumerate(mutation_gene_counts_sorted_non_unique):
+    plt.text(i, v +0.1, str(v),ha = "center",va = "bottom")
+plt.title("Non-unique Genes Affected by Each Mutation Type")
+plt.xlabel("Mutation Type")
+plt.ylabel("Number of non-unique genes")
+plt.legend()
+plt.tight_layout()
+plt.show()
